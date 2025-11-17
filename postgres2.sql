@@ -10,9 +10,7 @@ CREATE TABLE entities (
 );
 
 CREATE INDEX idx_entities_type ON entities (entity_type);
-
 CREATE INDEX idx_entities_ref ON entities (ref_id);
-
 CREATE UNIQUE INDEX idx_entities_inn ON entities (inn);
 
 ALTER TABLE entities
@@ -28,14 +26,12 @@ CREATE TABLE contacts (
 );
 
 CREATE INDEX idx_contacts_entity ON contacts (entity_id);
-
 CREATE INDEX idx_contacts_primary ON contacts (entity_id)
 WHERE
   is_primary = TRUE;
 
 ALTER TABLE contacts
 ADD CONSTRAINT chk_contacts_fullname CHECK (full_name <> '');
-
 ALTER TABLE contacts
 ADD CONSTRAINT uq_contacts_primary UNIQUE (entity_id, is_primary) DEFERRABLE INITIALLY DEFERRED;
 
@@ -57,12 +53,10 @@ CREATE TABLE contact_channels (
 );
 
 CREATE INDEX idx_channels_contact ON contact_channels (contact_id);
-
 CREATE INDEX idx_channels_type ON contact_channels (channel_type);
 
 ALTER TABLE contact_channels
 ADD CONSTRAINT chk_channel_value CHECK (length(value) > 0);
-
 ALTER TABLE contact_channels
 ADD CONSTRAINT uq_channel_primary UNIQUE (contact_id, channel_type, is_primary) DEFERRABLE INITIALLY DEFERRED;
 
@@ -74,7 +68,6 @@ CREATE TABLE product_categories (
 );
 
 CREATE INDEX idx_category_name ON product_categories (name);
-
 CREATE INDEX idx_category_parent ON product_categories (parent_id);
 
 ALTER TABLE product_categories
@@ -92,11 +85,8 @@ CREATE TABLE suppliers (
 );
 
 CREATE INDEX idx_suppliers_name ON suppliers (name);
-
 CREATE INDEX idx_suppliers_email ON suppliers (email);
-
 CREATE INDEX idx_suppliers_phone ON suppliers (phone);
-
 CREATE UNIQUE INDEX idx_suppliers_inn ON suppliers (inn);
 
 ALTER TABLE suppliers
@@ -114,9 +104,7 @@ CREATE TABLE manufacturers (
 );
 
 CREATE INDEX idx_manufacturers_name ON manufacturers (name);
-
 CREATE INDEX idx_manufacturers_inn ON manufacturers (inn);
-
 CREATE INDEX idx_manufacturers_phone ON manufacturers (phone);
 
 ALTER TABLE manufacturers
@@ -136,11 +124,8 @@ CREATE TABLE customers (
 );
 
 CREATE INDEX idx_customers_name ON customers (name);
-
 CREATE INDEX idx_customers_type ON customers (type);
-
 CREATE INDEX idx_customers_inn ON customers (inn);
-
 CREATE INDEX idx_customers_phone ON customers (phone);
 
 ALTER TABLE customers
@@ -158,14 +143,11 @@ CREATE TABLE materials (
 );
 
 CREATE INDEX idx_material_name ON materials (name);
-
 CREATE INDEX idx_material_supplier ON materials (supplier_id);
-
 CREATE INDEX idx_material_type_supplier ON materials (type, supplier_id);
 
 ALTER TABLE materials
 ADD CONSTRAINT chk_material_thickness CHECK (thickness_microns >= 0);
-
 ALTER TABLE materials
 ADD CONSTRAINT uq_material_sku UNIQUE (sku);
 
@@ -187,19 +169,14 @@ CREATE TABLE products (
 );
 
 CREATE INDEX idx_products_name ON products (name);
-
 CREATE INDEX idx_products_category ON products (category_id);
-
 CREATE INDEX idx_products_material ON products (material_id);
-
 CREATE INDEX idx_products_cat_mat ON products (category_id, material_id);
 
 ALTER TABLE products
 ADD CONSTRAINT chk_product_width CHECK (width_mm > 0);
-
 ALTER TABLE products
 ADD CONSTRAINT chk_product_height CHECK (height_mm > 0);
-
 ALTER TABLE products
 ADD CONSTRAINT uq_product_name_dims UNIQUE (name, width_mm, height_mm);
 
@@ -216,9 +193,7 @@ CREATE TABLE prices (
 );
 
 CREATE INDEX idx_prices_value ON prices (value);
-
 CREATE INDEX idx_prices_product_period ON prices (product_id, valid_from, valid_to);
-
 CREATE INDEX idx_prices_active ON prices (valid_from, valid_to)
 WHERE
   valid_to IS NULL
@@ -263,7 +238,6 @@ CREATE TABLE order_items (
 );
 
 CREATE INDEX idx_order_items_product ON order_items (product_id);
-
 CREATE INDEX idx_order_items_dm ON order_items (dm_required);
 
 ALTER TABLE order_items
@@ -314,9 +288,7 @@ CREATE INDEX idx_production_status ON production_orders (status);
 ALTER TABLE production_orders
 ADD CONSTRAINT chk_production_qty CHECK (
   produced_qty IS NULL
-  OR produced_qty <= planned_qty
-);
-
+  OR produced_qty <= planned_qty);
 ALTER TABLE production_orders
 ADD CONSTRAINT chk_production_scrap CHECK (scrap_qty >= 0);
 
@@ -336,8 +308,6 @@ CREATE INDEX idx_datamatrix_status_date ON datamatrix_batches (status, printed_a
 ALTER TABLE datamatrix_batches
 ADD CONSTRAINT chk_dm_range CHECK (
   range_end >= range_start
-  AND range_start > 0
-);
-
+  AND range_start > 0);
 ALTER TABLE datamatrix_batches
 ADD CONSTRAINT uq_dm_range UNIQUE (code_prefix, range_start, range_end);
