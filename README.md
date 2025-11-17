@@ -19,6 +19,10 @@
 - CREATE INDEX idx_entities_ref ON entities(ref_id);
 - CREATE UNIQUE INDEX idx_entities_inn ON entities(inn);
 
+Огранияения
+- ALTER TABLE entities
+    ADD CONSTRAINT uq_entities_type_ref UNIQUE (entity_type, ref_id);
+
 2. Анализ таблицы contacts
 
 Возможные запросы / ограничения
@@ -33,6 +37,11 @@
 Индексы
 - CREATE INDEX idx_contacts_entity ON contacts(entity_id);
 - CREATE INDEX idx_contacts_primary ON contacts(entity_id) WHERE is_primary = TRUE;
+
+Ограничения
+- ALTER TABLE contacts
+    ADD CONSTRAINT uq_contacts_primary UNIQUE (entity_id, is_primary)
+    DEFERRABLE INITIALLY DEFERRED;
 
 3. Анализ таблицы contact_channels
 
@@ -49,6 +58,13 @@
 - CREATE INDEX idx_channels_type ON contact_channels(channel_type);
 - CREATE INDEX idx_channels_contact ON contact_channels(contact_id);
 
+Ограничения 
+- ALTER TABLE contact_channels
+    ADD CONSTRAINT chk_channel_value CHECK (length(value) > 0);
+- ALTER TABLE contact_channels
+    ADD CONSTRAINT uq_channel_primary UNIQUE (contact_id, channel_type, is_primary)
+    DEFERRABLE INITIALLY DEFERRED;
+
 4. Анализ таблицы product_categories
 
 Возможные запросы / ограничения
@@ -62,6 +78,9 @@
 - CREATE INDEX idx_category_name ON product_categories(name);
 - CREATE INDEX idx_category_parent ON product_categories(parent_id);
 
+Ограничения
+- ALTER TABLE product_categories
+    ADD CONSTRAINT uq_category_name_parent UNIQUE (name, parent_id);
 
 5. Анализ таблицы materials
 
@@ -79,6 +98,13 @@
 - CREATE INDEX idx_material_type_supplier 
     ON materials(type, supplier_id);
 - CREATE INDEX idx_material_supplier ON materials(supplier_id);
+
+Ограничения
+- ALTER TABLE materials
+    ADD CONSTRAINT chk_material_thickness CHECK (thickness_microns >= 0);
+- ALTER TABLE materials
+    ADD CONSTRAINT uq_material_sku UNIQUE (sku);
+
 
 6. Анализ таблицы products
 
@@ -98,6 +124,14 @@
 - CREATE INDEX idx_products_cat_mat ON products(category_id, material_id);
 - CREATE INDEX idx_products_material ON products(material_id);
 
+Ограничения
+- ALTER TABLE products
+    ADD CONSTRAINT chk_product_width CHECK (width_mm > 0);
+- ALTER TABLE products
+    ADD CONSTRAINT chk_product_height CHECK (height_mm > 0);
+- ALTER TABLE products
+    ADD CONSTRAINT uq_product_name_dims UNIQUE (name, width_mm, height_mm);
+  
 7. Анализ таблицы prices
 
 Возможные запросы / ограничения
@@ -121,6 +155,10 @@
     ON prices(valid_from, valid_to)
     WHERE valid_to IS NULL OR valid_to >= CURRENT_DATE;
 
+Ограничения
+- ALTER TABLE prices
+    ADD CONSTRAINT uq_price_period UNIQUE (product_id, customer_id, valid_from); 
+
 8. Анализ таблицы orders
    
 Возможные запросы / ограничения
@@ -136,6 +174,9 @@
 Индексы
 - CREATE INDEX idx_orders_customer_date 
     ON orders(customer_id, order_date DESC);
+Ограничения
+- ALTER TABLE orders
+    ADD CONSTRAINT chk_order_delivery_date CHECK (delivery_date IS NULL OR delivery_date >= order_date);
 
 9. Анализ таблицы order_items
 
@@ -151,6 +192,10 @@
 - CREATE INDEX idx_order_items_product ON order_items(product_id);
 - CREATE INDEX idx_order_items_dm ON order_items(dm_required);
 
+Ограничения
+- ALTER TABLE order_items
+    ADD CONSTRAINT uq_order_item UNIQUE (order_id, product_id);
+  
 10. Анализ таблицы purchase_orders
 
 | Поле        | Запрос             | Кардинальность | Ограничения |
@@ -175,6 +220,14 @@
 - CREATE INDEX idx_production_status 
     ON production_orders(status);
 
+ Ограничения
+
+ - ALTER TABLE production_orders
+    ADD CONSTRAINT chk_production_qty CHECK (produced_qty IS NULL OR produced_qty <= planned_qty);
+- ALTER TABLE production_orders
+    ADD CONSTRAINT chk_production_scrap CHECK (scrap_qty >= 0);
+
+
 12. Анализ таблицы datamatrix_batches
 
 | Поле       | Запрос                | Кардинальность | Ограничения |
@@ -186,3 +239,9 @@
 Индексы
 - CREATE INDEX idx_datamatrix_status_date
     ON datamatrix_batches(status, printed_at DESC);
+
+Ограничения 
+- ALTER TABLE datamatrix_batches
+    ADD CONSTRAINT chk_dm_range CHECK (range_end >= range_start AND range_start > 0);
+- ALTER TABLE datamatrix_batches
+    ADD CONSTRAINT uq_dm_range UNIQUE (code_prefix, range_start, range_end);
