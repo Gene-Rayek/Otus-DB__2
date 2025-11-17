@@ -15,11 +15,11 @@
 | is_active   | Фильтр активных сущностей      | Средняя             | BOOLEAN         |
 
 Индексы
-- CREATE INDEX idx_entities_type ON entities(entity_type);
+- CREATE INDEX idx_entities_type ON entities(entity_type); 
 - CREATE INDEX idx_entities_ref ON entities(ref_id);
 - CREATE UNIQUE INDEX idx_entities_inn ON entities(inn);
 
-Огранияения
+Ограничения
 - ALTER TABLE entities
     ADD CONSTRAINT uq_entities_type_ref UNIQUE (entity_type, ref_id);
 
