@@ -194,10 +194,10 @@ CREATE TABLE prices (
 
 CREATE INDEX idx_prices_value ON prices (value);
 CREATE INDEX idx_prices_product_period ON prices (product_id, valid_from, valid_to);
-CREATE INDEX idx_prices_active ON prices (valid_from, valid_to)
-WHERE
-  valid_to IS NULL
-  OR valid_to >= CURRENT_DATE;
+CREATE INDEX idx_prices_active
+  ON prices (valid_from, valid_to)
+  WHERE valid_to IS NULL;
+
 
 ALTER TABLE prices
 ADD CONSTRAINT uq_price_period UNIQUE (product_id, customer_id, valid_from);
